@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    expose:
+      - "8000"
+    volumes:
+      # Basin 17 (Nile) is baked into the image at build time (see
+      # Dockerfile), but Sinai/Red Sea/Western Desert clicks download
+      # their basin on first use — this volume keeps that download from
+      # being wiped and re-fetched every time the container restarts.
+      - egypt_data:/data
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:
+  egypt_data:
